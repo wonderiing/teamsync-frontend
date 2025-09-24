@@ -22,6 +22,7 @@ import {
   PlayCircle,
   PauseCircle,
   Loader2,
+  Activity,
 } from "lucide-react"
 
 interface EmployeeDashboardProps {
@@ -301,10 +302,10 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-stable">
         {/* Attendance Card */}
-        <Card className="glass-effect card-hover-animate card-animate stagger-1">
+        <Card className="glass-effect hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer border border-green-500/20 hover:border-green-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-accent" />
+              <Clock className="w-5 h-5 text-green-400" />
               Asistencia Hoy
             </CardTitle>
             <CardDescription>
@@ -316,7 +317,7 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Horas hoy:</span>
-              <span className="font-medium">{dashboardData.attendanceStatus.totalHoursToday.toFixed(1)}h</span>
+              <span className="font-medium text-green-400">{dashboardData.attendanceStatus.totalHoursToday.toFixed(1)}h</span>
             </div>
 
             {dashboardData.attendanceStatus.loading ? (
@@ -325,12 +326,12 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
                 Procesando...
               </Button>
             ) : dashboardData.attendanceStatus.isCheckedIn ? (
-              <Button onClick={handleCheckOut} className="w-full btn-animate" variant="destructive">
+              <Button onClick={handleCheckOut} className="w-full hover:bg-red-600 transition-colors" variant="destructive">
                 <PauseCircle className="w-4 h-4 mr-2" />
                 Registrar Salida
               </Button>
             ) : (
-              <Button onClick={handleCheckIn} className="w-full btn-animate">
+              <Button onClick={handleCheckIn} className="w-full hover:bg-green-600 transition-colors bg-green-600 hover:bg-green-700">
                 <PlayCircle className="w-4 h-4 mr-2" />
                 Registrar Entrada
               </Button>
@@ -339,10 +340,10 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
         </Card>
 
         {/* Weekly Progress */}
-        <Card className="glass-effect card-hover-animate card-animate stagger-2">
+        <Card className="glass-effect hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer border border-blue-500/20 hover:border-blue-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-chart-2" />
+              <TrendingUp className="w-5 h-5 text-blue-400" />
               Progreso Semanal
             </CardTitle>
             <CardDescription>{dashboardData.attendanceStatus.totalHoursWeek.toFixed(1)} de 40 horas</CardDescription>
@@ -350,10 +351,10 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
           <CardContent className="space-y-4">
             <Progress value={(dashboardData.attendanceStatus.totalHoursWeek / 40) * 100} className="w-full" />
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{Math.round((dashboardData.attendanceStatus.totalHoursWeek / 40) * 100)}% completado</span>
-              <span>{(40 - dashboardData.attendanceStatus.totalHoursWeek).toFixed(1)}h restantes</span>
+              <span className="text-blue-400 font-medium">{Math.round((dashboardData.attendanceStatus.totalHoursWeek / 40) * 100)}% completado</span>
+              <span className="text-orange-400">{(40 - dashboardData.attendanceStatus.totalHoursWeek).toFixed(1)}h restantes</span>
             </div>
-            <Button variant="outline" className="w-full bg-transparent btn-animate">
+            <Button variant="outline" className="w-full bg-transparent hover:bg-blue-500/20 hover:border-blue-500/50 transition-colors">
               <Calendar className="w-4 h-4 mr-2" />
               Ver Calendario
             </Button>
@@ -361,10 +362,10 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
         </Card>
 
         {/* Quick Request */}
-        <Card className="glass-effect card-hover-animate card-animate stagger-3">
+        <Card className="glass-effect hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer border border-purple-500/20 hover:border-purple-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-chart-3" />
+              <FileText className="w-5 h-5 text-purple-400" />
               Solicitudes
             </CardTitle>
             <CardDescription>Gestiona tus permisos y solicitudes</CardDescription>
@@ -376,15 +377,18 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
                 {dashboardData.pendingRequests}
               </Badge>
             </div>
-            <Button className="w-full btn-animate">Nueva Solicitud</Button>
+            <Button className="w-full hover:bg-purple-600 transition-colors bg-purple-600 hover:bg-purple-700">Nueva Solicitud</Button>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Activity */}
-      <Card className="glass-effect card-hover-animate card-animate stagger-4">
+      <Card className="glass-effect hover:shadow-xl transition-all duration-300 border border-indigo-500/20 hover:border-indigo-500/40">
         <CardHeader>
-          <CardTitle>Actividad Reciente</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-indigo-400" />
+            Actividad Reciente
+          </CardTitle>
           <CardDescription>Tus últimas acciones en la plataforma</CardDescription>
         </CardHeader>
         <CardContent>
@@ -396,16 +400,16 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
                 <p className="text-sm">Las actividades aparecerán aquí cuando comiences a usar el sistema</p>
               </div>
             ) : (
-              dashboardData.recentActivities.map((activity) => {
+              dashboardData.recentActivities.map((activity, index) => {
                 const IconComponent = getActivityIcon(activity.type)
                 return (
-                  <div key={activity.id} className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      <IconComponent className="w-5 h-5 text-primary" />
+                  <div key={activity.id} className="flex items-start gap-4 p-4 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors cursor-pointer border border-transparent hover:border-indigo-500/20">
+                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                      <IconComponent className="w-5 h-5 text-indigo-400" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-medium text-sm">{activity.title}</h4>
+                        <h4 className="font-medium text-sm text-foreground">{activity.title}</h4>
                         <div className="flex items-center gap-2">
                           {activity.status && (
                             <Badge className={getStatusColor(activity.status)}>
@@ -419,6 +423,17 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground">{activity.description}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-indigo-400 font-medium">
+                          {formatTime(activity.timestamp)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs text-muted-foreground">
+                          {activity.type === "attendance" && "Asistencia"}
+                          {activity.type === "request" && "Solicitud"}
+                          {activity.type === "training" && "Capacitación"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )
@@ -430,10 +445,10 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
 
       {/* Training Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="glass-effect">
+        <Card className="glass-effect hover:shadow-xl transition-all duration-300 border border-orange-500/20 hover:border-orange-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-chart-4" />
+              <GraduationCap className="w-5 h-5 text-orange-400" />
               Capacitación en Progreso
             </CardTitle>
             <CardDescription>Cursos y certificaciones disponibles</CardDescription>
@@ -441,54 +456,54 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Seguridad Laboral</span>
-                <span className="text-xs text-muted-foreground">75%</span>
+                <span className="text-sm font-medium text-foreground">Seguridad Laboral</span>
+                <span className="text-xs text-orange-400 font-medium">75%</span>
               </div>
               <Progress value={75} className="w-full" />
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Comunicación Efectiva</span>
-                <span className="text-xs text-muted-foreground">30%</span>
+                <span className="text-sm font-medium text-foreground">Comunicación Efectiva</span>
+                <span className="text-xs text-orange-400 font-medium">30%</span>
               </div>
               <Progress value={30} className="w-full" />
             </div>
 
-            <Button variant="outline" className="w-full bg-transparent">
+            <Button variant="outline" className="w-full bg-transparent hover:bg-orange-500/20 hover:border-orange-500/50 transition-colors">
               Ver Todos los Cursos
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="glass-effect">
+        <Card className="glass-effect hover:shadow-xl transition-all duration-300 border border-yellow-500/20 hover:border-yellow-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-chart-5" />
+              <AlertCircle className="w-5 h-5 text-yellow-400" />
               Recordatorios
             </CardTitle>
             <CardDescription>Tareas y fechas importantes</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/20 transition-colors cursor-pointer">
                 <AlertCircle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium">Evaluación de desempeño</p>
+                  <p className="text-sm font-medium text-foreground">Evaluación de desempeño</p>
                   <p className="text-xs text-muted-foreground">Vence el 25 de enero</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition-colors cursor-pointer">
                 <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium">Actualizar información personal</p>
+                  <p className="text-sm font-medium text-foreground">Actualizar información personal</p>
                   <p className="text-xs text-muted-foreground">Opcional</p>
                 </div>
               </div>
             </div>
 
-            <Button variant="outline" className="w-full bg-transparent">
+            <Button variant="outline" className="w-full bg-transparent hover:bg-yellow-500/20 hover:border-yellow-500/50 transition-colors">
               Ver Todos los Recordatorios
             </Button>
           </CardContent>
