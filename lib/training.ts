@@ -34,7 +34,7 @@ export interface CreateTutorialData {
 
 export class TrainingService {
   private static getAuthHeaders() {
-    const token = localStorage.getItem("worky_token")
+    const token = localStorage.getItem("teamsync_token")
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -42,7 +42,7 @@ export class TrainingService {
   }
 
   private static getCompanyIdFromToken(): number | null {
-    const token = localStorage.getItem("worky_token")
+    const token = localStorage.getItem("teamsync_token")
     if (!token) return null
     
     try {

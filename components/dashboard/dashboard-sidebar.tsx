@@ -31,7 +31,7 @@ export function DashboardSidebar({ user, isOpen, onClose, onLogout }: DashboardS
   }
 
   const menuItems = [
-    { icon: BarChart3, label: "Dashboard", href: "/", roles: ["EMPLOYEE", "HR", "ADMIN"] },
+    { icon: BarChart3, label: "Dashboard", href: "/dashboard", roles: ["EMPLOYEE", "HR", "ADMIN"] },
     { icon: Clock, label: "Asistencia", href: "/attendance", roles: ["EMPLOYEE", "HR", "ADMIN"] },
     { icon: FileText, label: "Solicitudes", href: "/requests", roles: ["EMPLOYEE", "HR", "ADMIN"] },
     { icon: Users, label: "Empleados", href: "/employees", roles: ["HR", "ADMIN"] },

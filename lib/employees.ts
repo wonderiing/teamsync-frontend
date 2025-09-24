@@ -34,7 +34,7 @@ export interface CreateEmployeeData {
 
 export class EmployeeService {
   private static getAuthHeaders() {
-    const token = localStorage.getItem("worky_token")
+    const token = localStorage.getItem("teamsync_token")
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,

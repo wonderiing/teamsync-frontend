@@ -54,12 +54,22 @@ export function useAuth() {
         throw new Error("Email or username required")
       }
 
+      console.log("✅ Login successful, setting user:", response.user)
       setUser(response.user)
       Logger.info("Login successful", {
         userId: response.user.id,
         role: response.user.role,
         username: response.user.username,
       })
+
+      // Forzar actualización del estado
+      setTimeout(() => {
+        setUser(response.user)
+        if (typeof window !== "undefined") {
+          window.location.href = "/dashboard"
+        }
+      }, 100)
+
       return response
     } catch (error) {
       Logger.error("Login failed", error)
@@ -73,6 +83,10 @@ export function useAuth() {
     Logger.info("User logging out", { userId: user?.id })
     AuthService.logout()
     setUser(null)
+    // Redirigir al login después del logout
+    if (typeof window !== "undefined") {
+      window.location.href = "/"
+    }
   }
 
   return {

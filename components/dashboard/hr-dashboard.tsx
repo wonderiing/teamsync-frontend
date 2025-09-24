@@ -178,10 +178,10 @@ export function HRDashboard({ user }: HRDashboardProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-background text-foreground">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl p-6 glass-effect">
-        <h2 className="text-2xl font-bold mb-2">Panel de Recursos Humanos</h2>
+      <div className="bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 rounded-xl p-6 glass-effect border border-emerald-500/30">
+        <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Panel de Recursos Humanos</h2>
         <p className="text-muted-foreground">Gestiona empleados, asistencias y solicitudes de tu empresa.</p>
       </div>
 

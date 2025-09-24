@@ -50,7 +50,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
 
         {/* Page content with consistent margins */}
-        <main className="flex-1 p-6 pb-8 layout-stable">
+        <main className="flex-1 p-6 pb-8 layout-stable bg-background text-foreground">
           <div className="max-w-7xl mx-auto">
             <div className="page-enter">
               {children}

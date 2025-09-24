@@ -25,7 +25,7 @@ export class Logger {
     // Store in localStorage for persistence
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("worky_logs", JSON.stringify(this.logs.slice(0, 100)))
+        localStorage.setItem("teamsync_logs", JSON.stringify(this.logs.slice(0, 100)))
       } catch (e) {
         // Ignore localStorage errors
       }
@@ -51,14 +51,14 @@ export class Logger {
   static clearLogs() {
     this.logs = []
     if (typeof window !== "undefined") {
-      localStorage.removeItem("worky_logs")
+      localStorage.removeItem("teamsync_logs")
     }
   }
 
   static loadLogs() {
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem("worky_logs")
+        const stored = localStorage.getItem("teamsync_logs")
         if (stored) {
           const parsedLogs = JSON.parse(stored)
           this.logs = parsedLogs

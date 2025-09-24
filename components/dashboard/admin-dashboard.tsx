@@ -91,10 +91,10 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
     )
   }
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-background text-foreground">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-xl p-6 glass-effect">
-        <h2 className="text-2xl font-bold mb-2">Panel de Administración</h2>
+      <div className="bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl p-6 glass-effect border border-red-500/30">
+        <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">Panel de Administración</h2>
         <p className="text-muted-foreground">Control total del sistema, empresas y configuraciones globales.</p>
       </div>
 

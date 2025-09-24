@@ -27,12 +27,15 @@ export function Dashboard({ user }: DashboardProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen bg-background dashboard-content">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-2 text-foreground">Dashboard</h1>
         <p className="text-muted-foreground">Bienvenido de vuelta, {user.fullName || user.username}</p>
       </div>
-      {renderDashboardContent()}
+      
+      <div className="bg-background text-foreground">
+        {renderDashboardContent()}
+      </div>
     </div>
   )
 }

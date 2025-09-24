@@ -286,36 +286,17 @@ export function EmployeeDashboard({ user }: EmployeeDashboardProps) {
     })
   }
 
-  if (dashboardData.loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center py-12">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Cargando dashboard...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
+  // Simplified version without loading state for debugging
   console.log('Rendering dashboard with data:', dashboardData)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-background text-foreground">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-primary/20 to-accent/20 rounded-xl p-6 glass-effect">
-        <h2 className="text-2xl font-bold mb-2">¡Hola, {user.fullName || user.username}!</h2>
+      <div className="bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-xl p-6 glass-effect border border-blue-500/30">
+        <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">¡Hola, {user.fullName || user.username}!</h2>
         <p className="text-muted-foreground">Aquí tienes un resumen de tu actividad y tareas pendientes.</p>
       </div>
 
-      {/* Debug Info */}
-      <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded">
-        <p><strong>Debug:</strong> Dashboard cargado correctamente</p>
-        <p>Loading: {dashboardData.loading ? 'true' : 'false'}</p>
-        <p>User: {user.fullName || user.username}</p>
-        <p>Role: {user.role}</p>
-      </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-stable">

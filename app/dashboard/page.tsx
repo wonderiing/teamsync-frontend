@@ -6,14 +6,13 @@ import { useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
 import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { useState } from "react"
-import { AttendanceTracker } from "@/components/attendance/attendance-tracker"
-import { AttendanceHistory } from "@/components/attendance/attendance-history"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Clock, History, BarChart3 } from "lucide-react"
+import { EmployeeDashboard } from "@/components/dashboard/employee-dashboard"
+import { HRDashboard } from "@/components/dashboard/hr-dashboard"
+import { AdminDashboard } from "@/components/dashboard/admin-dashboard"
 
-export default function AttendancePage() {
+export default function DashboardPage() {
   const { user, loading, isAuthenticated, logout } = useAuth()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -44,6 +43,19 @@ export default function AttendancePage() {
         </div>
       </div>
     )
+  }
+
+  const renderDashboardContent = () => {
+    switch (user.role) {
+      case "EMPLOYEE":
+        return <EmployeeDashboard user={user} />
+      case "HR":
+        return <HRDashboard user={user} />
+      case "ADMIN":
+        return <AdminDashboard user={user} />
+      default:
+        return <EmployeeDashboard user={user} />
+    }
   }
 
   return (
@@ -81,48 +93,12 @@ export default function AttendancePage() {
         <main className="flex-1 p-6 pb-8">
           <div className="max-w-7xl mx-auto">
             <div className="space-y-6">
-              <div className="bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-teal-500/20 rounded-xl p-6 glass-effect border border-green-500/30">
-                <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">Gestión de Asistencia</h1>
-                <p className="text-muted-foreground">Registra tu asistencia diaria y consulta tu historial</p>
+              <div>
+                <h1 className="text-3xl font-bold mb-2 text-foreground">Dashboard</h1>
+                <p className="text-muted-foreground">Bienvenido de vuelta, {user.fullName || user.username}</p>
               </div>
-
-              <Tabs defaultValue="tracker" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
-                  <TabsTrigger value="tracker" className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Registro
-                  </TabsTrigger>
-                  <TabsTrigger value="history" className="flex items-center gap-2">
-                    <History className="w-4 h-4" />
-                    Historial
-                  </TabsTrigger>
-                  <TabsTrigger value="reports" className="flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4" />
-                    Reportes
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="tracker">
-                  <AttendanceTracker />
-                </TabsContent>
-
-                <TabsContent value="history">
-                  <AttendanceHistory />
-                </TabsContent>
-
-                <TabsContent value="reports">
-                  <div className="text-center py-12">
-                    <BarChart3 className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="text-lg font-semibold mb-2">Reportes de Asistencia</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Próximamente: análisis detallados y reportes de productividad
-                    </p>
-                    <Button variant="outline" className="bg-transparent">
-                      Solicitar Acceso Anticipado
-                    </Button>
-                  </div>
-                </TabsContent>
-              </Tabs>
+              
+              {renderDashboardContent()}
             </div>
           </div>
         </main>

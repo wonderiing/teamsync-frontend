@@ -123,6 +123,38 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Prevent FOUC (Flash of Unstyled Content) */
+  html {
+    color-scheme: dark;
+  }
+  
+  /* Ensure smooth theme transitions */
+  * {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  
+  /* Force visibility for main content areas */
+  main {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+  
+  /* Ensure dashboard content is visible */
+  .dashboard-content {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    min-height: 100vh;
+  }
+  
+  /* Force text visibility */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--foreground) !important;
+  }
+  
+  p, span, div {
+    color: var(--foreground) !important;
+  }
 }
 
 /* Added custom Material Design animations and effects */
@@ -200,13 +232,14 @@
   }
 }
 
-/* Page transition animations */
+/* Page transition animations - Optimized to prevent flash */
 .page-enter {
-  animation: slideInFromRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: slideInFromRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 1;
 }
 
 .page-exit {
-  animation: slideInFromLeft 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse;
+  animation: slideInFromLeft 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse;
 }
 
 /* Card animations */

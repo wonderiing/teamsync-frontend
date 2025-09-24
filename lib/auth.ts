@@ -19,16 +19,22 @@ export class AuthService {
   private static token: string | null = null
 
   static setToken(token: string) {
+    console.log("🔑 AuthService.setToken called with:", token)
     this.token = token
     if (typeof window !== "undefined") {
-      localStorage.setItem("worky_token", token)
+      localStorage.setItem("teamsync_token", token)
+      console.log("🔑 Token saved to localStorage as teamsync_token")
     }
   }
 
   static getToken(): string | null {
-    if (this.token) return this.token
+    if (this.token) {
+      console.log("🔑 AuthService.getToken - returning cached token")
+      return this.token
+    }
     if (typeof window !== "undefined") {
-      this.token = localStorage.getItem("worky_token")
+      this.token = localStorage.getItem("teamsync_token")
+      console.log("🔑 AuthService.getToken - retrieved from localStorage:", this.token)
     }
     return this.token
   }
@@ -36,7 +42,7 @@ export class AuthService {
   static removeToken() {
     this.token = null
     if (typeof window !== "undefined") {
-      localStorage.removeItem("worky_token")
+      localStorage.removeItem("teamsync_token")
     }
   }
 
