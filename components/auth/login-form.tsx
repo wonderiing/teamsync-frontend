@@ -119,20 +119,6 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="username-optional">Nombre de usuario (opcional)</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="username-optional"
-                    type="text"
-                    placeholder="usuario"
-                    value={emailForm.username}
-                    onChange={(e) => setEmailForm((prev) => ({ ...prev, username: e.target.value }))}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email-password">Contraseña</Label>

@@ -23,11 +23,13 @@ import {
 } from "@/components/ui/dialog"
 import { TrainingService, type Tutorial, type CreateTutorialData } from "@/lib/training"
 import { Logger } from "@/lib/logger"
+import { useToast } from "@/hooks/use-toast"
 
 export default function TrainingPage() {
   const { user, loading, isAuthenticated, logout } = useAuth()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { toast } = useToast()
   const [tutorials, setTutorials] = useState<Tutorial[]>([])
   const [loadingData, setLoadingData] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -87,6 +89,11 @@ export default function TrainingPage() {
   const handleCreateTutorial = async () => {
     if (!user?.companyId) {
       Logger.error("Cannot create tutorial: user has no companyId")
+      toast({
+        title: "Error",
+        description: "No se puede crear tutorial: usuario sin companyId",
+        variant: "destructive",
+      })
       return
     }
 
@@ -97,6 +104,10 @@ export default function TrainingPage() {
 
     try {
       await TrainingService.createTutorial(newTutorial)
+      toast({
+        title: "Tutorial creado",
+        description: "El tutorial ha sido creado exitosamente",
+      })
       setShowCreateDialog(false)
       setNewTutorial({
         idCompany: user.companyId,
@@ -109,6 +120,11 @@ export default function TrainingPage() {
       loadTutorials()
     } catch (error) {
       Logger.error("Failed to create tutorial", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al crear tutorial",
+        variant: "destructive",
+      })
     }
   }
 

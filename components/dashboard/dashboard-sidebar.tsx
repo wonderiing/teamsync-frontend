@@ -3,7 +3,7 @@
 import type { User } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Building2, Clock, FileText, Users, GraduationCap, Settings, LogOut, X, BarChart3, Shield } from "lucide-react"
+import { Building2, Clock, FileText, Users, GraduationCap, Settings, LogOut, X, BarChart3, Shield, Building } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -36,7 +36,7 @@ export function DashboardSidebar({ user, isOpen, onClose, onLogout }: DashboardS
     { icon: FileText, label: "Solicitudes", href: "/requests", roles: ["EMPLOYEE", "HR", "ADMIN"] },
     { icon: Users, label: "Empleados", href: "/employees", roles: ["HR", "ADMIN"] },
     { icon: GraduationCap, label: "Capacitación", href: "/training", roles: ["EMPLOYEE", "HR", "ADMIN"] },
-    { icon: Building2, label: "Empresas", href: "/companies", roles: ["ADMIN"] },
+    { icon: Building, label: "Departamentos", href: "/departments", roles: ["ADMIN"] },
     { icon: Shield, label: "Administración", href: "/admin", roles: ["ADMIN"] },
     { icon: Settings, label: "Configuración", href: "/settings", roles: ["EMPLOYEE", "HR", "ADMIN"] },
   ]

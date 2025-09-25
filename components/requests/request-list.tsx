@@ -13,8 +13,9 @@ import {
   REQUEST_TYPE_LABELS,
   REQUEST_STATUS_LABELS,
 } from "@/lib/requests"
-import { FileText, Filter, ChevronLeft, ChevronRight, Eye, Clock } from "lucide-react"
+import { FileText, Filter, Eye, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Pagination } from "@/components/ui/pagination"
 
 interface RequestListProps {
   isHR?: boolean
@@ -254,33 +255,12 @@ export function RequestList({ isHR = false, onRequestSelect }: RequestListProps)
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">
-                Página {currentPage + 1} de {totalPages}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
-                  disabled={currentPage === 0}
-                  className="bg-transparent"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))}
-                  disabled={currentPage === totalPages - 1}
-                  className="bg-transparent"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            className="mt-6 pt-4 border-t border-border"
+          />
         </CardContent>
       </Card>
     </div>

@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { AttendanceService, type AttendanceRecord, type AttendanceResponse } from "@/lib/attendance"
 import { useAuth } from "@/hooks/use-auth"
-import { Calendar, Clock, FileText, ChevronLeft, ChevronRight, Download, Users } from "lucide-react"
+import { Calendar, Clock, FileText, Download, Users } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { formatDateForDisplay, formatTimeForDisplay } from "@/lib/date-utils"
+import { Pagination } from "@/components/ui/pagination"
 
 export function AttendanceHistory() {
   const { user } = useAuth()
@@ -33,13 +35,31 @@ export function AttendanceHistory() {
 
       if (viewMode === "company" && (user?.role === "HR" || user?.role === "ADMIN")) {
         // Mostrar asistencias de toda la empresa
+        console.log("Loading company attendances - should show ALL employees")
         if (startDate && endDate) {
           response = await AttendanceService.getCompanyAttendancesByRange(startDate, endDate, currentPage, 10)
         } else {
           response = await AttendanceService.getCompanyAttendances(currentPage, 10)
         }
+        console.log("Company attendances response:", response)
+      } else if (user?.role === "HR" || user?.role === "ADMIN") {
+        // Para usuarios HR/ADMIN en modo personal, usar endpoint de empresa pero filtrar por su ID
+        // Esto es una solución temporal hasta que el backend arregle el endpoint my-attendances
+        console.log("HR/ADMIN user trying to view personal attendances - using company endpoint as workaround")
+        
+        if (startDate && endDate) {
+          response = await AttendanceService.getCompanyAttendancesByRange(startDate, endDate, currentPage, 100)
+        } else {
+          response = await AttendanceService.getCompanyAttendances(currentPage, 100)
+        }
+        
+        // Filtrar solo las asistencias del usuario actual
+        // Esto es temporal hasta que el backend arregle el problema
+        if (user.employeeId) {
+          response.content = response.content.filter(record => record.employeeId === user.employeeId)
+        }
       } else {
-        // Mostrar asistencias personales
+        // Mostrar asistencias personales para empleados normales
         if (startDate && endDate) {
           response = await AttendanceService.getMyAttendancesByRange(startDate, endDate, currentPage, 10)
         } else {
@@ -47,6 +67,11 @@ export function AttendanceHistory() {
         }
       }
 
+      console.log('AttendanceHistory - Response:', response)
+      console.log('AttendanceHistory - User role:', user?.role)
+      console.log('AttendanceHistory - View mode:', viewMode)
+      console.log('AttendanceHistory - Attendances:', response.content)
+      
       setAttendances(response.content);
       setTotalPages(response.totalPages);
     } catch (error) {
@@ -72,24 +97,8 @@ export function AttendanceHistory() {
     loadAttendances()
   }
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return ""
-    // El backend devuelve fechas en formato "YYYY-MM-DD"
-    const date = new Date(dateString + "T00:00:00")
-    return date.toLocaleDateString("es-ES", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    })
-  }
-
-  const formatTime = (timeString: string) => {
-    if (!timeString) return ""
-    // El backend devuelve horas en formato "HH:MM:SS"
-    const [hours, minutes] = timeString.split(":")
-    return `${hours}:${minutes}`
-  }
+  const formatDate = formatDateForDisplay
+  const formatTime = formatTimeForDisplay
 
   const calculateHours = (checkIn: string, checkOut?: string) => {
     if (!checkOut) return 0
@@ -268,33 +277,12 @@ export function AttendanceHistory() {
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">
-                Página {currentPage + 1} de {totalPages}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
-                  disabled={currentPage === 0}
-                  className="bg-transparent"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))}
-                  disabled={currentPage === totalPages - 1}
-                  className="bg-transparent"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            className="mt-6 pt-4 border-t border-border"
+          />
         </CardContent>
       </Card>
     </div>

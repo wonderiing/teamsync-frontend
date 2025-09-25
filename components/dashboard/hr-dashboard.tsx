@@ -22,6 +22,7 @@ import {
   UserCheck,
   UserX,
   Calendar,
+  Building2,
 } from "lucide-react"
 
 interface HRDashboardProps {
@@ -339,7 +340,7 @@ export function HRDashboard({ user }: HRDashboardProps) {
           <CardDescription>Gestiona tu empresa de manera eficiente</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Button className="h-20 flex flex-col gap-2 btn-smooth">
               <Users className="w-6 h-6" />
               <span>Gestionar Empleados</span>

@@ -43,19 +43,29 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
     try {
       setDashboardData(prev => ({ ...prev, loading: true }))
       
-      // Cargar empresas
-      const companiesResponse = await CompanyService.getAllCompanies(0, 100)
-      const totalCompanies = companiesResponse.content.length
+      // Si es ADMIN, puede ver todas las empresas, si no solo su empresa
+      let totalCompanies = 0
+      let totalEmployees = 0
+      
+      // Todos los usuarios (ADMIN, HR, EMPLOYEE) solo ven su empresa
+      if (user.companyId) {
+        if (user.role === "ADMIN") {
+          // ADMIN puede ver todas las empresas pero el dashboard muestra solo su empresa
+          totalCompanies = 1 // Solo su empresa para el dashboard
+        } else {
+          totalCompanies = 1 // Solo su empresa
+        }
+        
+        // Todos ven solo empleados de su empresa
+        const employeesResponse = await EmployeeService.getCompanyEmployees(0, 100)
+        totalEmployees = employeesResponse.content.length
+      }
 
-      // Cargar empleados de todas las empresas
-      const employeesResponse = await EmployeeService.getAllEmployees(0, 100)
-      const totalEmployees = employeesResponse.content.length
-
-      // Cargar asistencias recientes
+      // Cargar asistencias de la empresa del usuario
       const attendancesResponse = await AttendanceService.getCompanyAttendances(0, 100)
       const totalAttendances = attendancesResponse.content.length
 
-      // Cargar solicitudes recientes
+      // Cargar solicitudes de la empresa del usuario
       const requestsResponse = await RequestService.getCompanyRequests(0, 100)
       const totalRequests = requestsResponse.content.length
 
@@ -94,98 +104,149 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
     <div className="space-y-6 bg-background text-foreground">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl p-6 glass-effect border border-red-500/30">
-        <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">Panel de Administración</h2>
-        <p className="text-muted-foreground">Control total del sistema, empresas y configuraciones globales.</p>
+        <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
+          {user.role === "ADMIN" ? "Panel de Administración" : 
+           user.role === "HR" ? "Panel de Recursos Humanos" : 
+           "Panel de Empleado"}
+        </h2>
+        <p className="text-muted-foreground">
+          Gestión de empleados, asistencias y solicitudes de tu empresa (ID: {user.companyId}).
+        </p>
       </div>
 
       {/* System Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="glass-effect card-hover stagger-1">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Empresas</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Mi Empresa
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-chart-1" />
               <span className="text-2xl font-bold">{dashboardData.totalCompanies}</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Empresas registradas</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Empresa asignada
+            </p>
           </CardContent>
         </Card>
 
         <Card className="glass-effect card-hover stagger-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Empleados</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Mis Empleados
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-green-400" />
               <span className="text-2xl font-bold">{dashboardData.totalEmployees}</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Empleados en el sistema</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Empleados en mi empresa
+            </p>
           </CardContent>
         </Card>
 
         <Card className="glass-effect card-hover stagger-3">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Asistencias</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Asistencias Empresa
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-blue-400" />
               <span className="text-2xl font-bold">{dashboardData.totalAttendances}</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Registros de asistencia</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Asistencias de mi empresa
+            </p>
           </CardContent>
         </Card>
 
         <Card className="glass-effect card-hover stagger-4">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Solicitudes</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Solicitudes Empresa
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Database className="w-5 h-5 text-chart-2" />
               <span className="text-2xl font-bold">{dashboardData.totalRequests}</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Solicitudes procesadas</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Solicitudes de mi empresa
+            </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Admin Tools */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {user.role === "ADMIN" && (
+          <Card className="glass-effect">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-chart-3" />
+                Gestión de Empresas
+              </CardTitle>
+              <CardDescription>Administra empresas y departamentos</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div>
+                    <p className="font-medium text-sm">Total Empresas</p>
+                    <p className="text-xs text-muted-foreground">{dashboardData.totalCompanies} registradas</p>
+                  </div>
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Activas</Badge>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  className="flex-1"
+                  onClick={() => window.location.href = "/departments"}
+                >
+                  Gestionar Departamentos
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="glass-effect">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-chart-3" />
-              Gestión de Empresas
+              <Users className="w-5 h-5 text-green-400" />
+              {user.role === "ADMIN" ? "Gestión Global" : "Gestión de Empleados"}
             </CardTitle>
-            <CardDescription>Administra empresas y departamentos</CardDescription>
+            <CardDescription>
+              {user.role === "ADMIN" 
+                ? "Administra empleados de todas las empresas" 
+                : "Gestiona empleados de tu empresa"
+              }
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div>
-                  <p className="font-medium text-sm">TechCorp Solutions</p>
-                  <p className="text-xs text-muted-foreground">245 empleados</p>
+                  <p className="font-medium text-sm">Total Empleados</p>
+                  <p className="text-xs text-muted-foreground">{dashboardData.totalEmployees} registrados</p>
                 </div>
-                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Activa</Badge>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div>
-                  <p className="font-medium text-sm">InnovateLab Inc.</p>
-                  <p className="text-xs text-muted-foreground">89 empleados</p>
-                </div>
-                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Activa</Badge>
+                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Activos</Badge>
               </div>
             </div>
 
             <div className="flex gap-2">
-              <Button className="flex-1">Nueva Empresa</Button>
+              <Button className="flex-1">Ver Empleados</Button>
               <Button variant="outline" className="flex-1 bg-transparent">
-                Ver Todas
+                Crear Empleado
               </Button>
             </div>
           </CardContent>
@@ -194,55 +255,55 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
         <Card className="glass-effect">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-red-400" />
-              Seguridad y Permisos
+              <Activity className="w-5 h-5 text-blue-400" />
+              Asistencias y Solicitudes
             </CardTitle>
-            <CardDescription>Control de acceso y auditoría</CardDescription>
+            <CardDescription>Gestiona asistencias y solicitudes</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div>
-                  <p className="font-medium text-sm">Intentos de acceso fallidos</p>
-                  <p className="text-xs text-muted-foreground">Últimas 24 horas</p>
+                  <p className="font-medium text-sm">Asistencias Registradas</p>
+                  <p className="text-xs text-muted-foreground">{dashboardData.totalAttendances} registros</p>
                 </div>
-                <span className="text-lg font-bold text-red-400">3</span>
+                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Activo</Badge>
               </div>
 
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div>
-                  <p className="font-medium text-sm">Sesiones activas</p>
-                  <p className="text-xs text-muted-foreground">Usuarios conectados</p>
+                  <p className="font-medium text-sm">Solicitudes Pendientes</p>
+                  <p className="text-xs text-muted-foreground">{dashboardData.totalRequests} solicitudes</p>
                 </div>
-                <span className="text-lg font-bold text-green-400">892</span>
+                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pendiente</Badge>
               </div>
             </div>
 
             <div className="flex gap-2">
-              <Button className="flex-1">Ver Logs</Button>
+              <Button className="flex-1">Ver Asistencias</Button>
               <Button variant="outline" className="flex-1 bg-transparent">
-                Configurar
+                Gestionar Solicitudes
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* System Management */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Additional Management Tools */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="glass-effect">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Server className="w-5 h-5 text-chart-4" />
-              Sistema
+              <Building2 className="w-5 h-5 text-chart-1" />
+              Capacitación
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full" variant="default">
-              Monitoreo
+              Ver Tutoriales
             </Button>
             <Button className="w-full bg-transparent" variant="outline">
-              Mantenimiento
+              Crear Tutorial
             </Button>
           </CardContent>
         </Card>
@@ -250,16 +311,16 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
         <Card className="glass-effect">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5 text-chart-5" />
-              Base de Datos
+              <Users className="w-5 h-5 text-green-400" />
+              Empleados
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full" variant="default">
-              Backup
+              Ver Empleados
             </Button>
             <Button className="w-full bg-transparent" variant="outline">
-              Optimizar
+              Crear Empleado
             </Button>
           </CardContent>
         </Card>
@@ -267,20 +328,93 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
         <Card className="glass-effect">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5 text-accent" />
-              Configuración
+              <Activity className="w-5 h-5 text-blue-400" />
+              Asistencias
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full" variant="default">
-              Sistema Global
+              Ver Asistencias
             </Button>
             <Button className="w-full bg-transparent" variant="outline">
-              Integraciones
+              Reportes
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-effect">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5 text-purple-400" />
+              Solicitudes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button className="w-full" variant="default">
+              Ver Solicitudes
+            </Button>
+            <Button className="w-full bg-transparent" variant="outline">
+              Gestionar
             </Button>
           </CardContent>
         </Card>
       </div>
+
+      {/* System Management - Solo para ADMIN */}
+      {user.role === "ADMIN" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="glass-effect">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-chart-3" />
+                Empresas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button className="w-full" variant="default">
+                Gestionar Empresas
+              </Button>
+              <Button className="w-full bg-transparent" variant="outline">
+                Crear Empresa
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-chart-5" />
+                Departamentos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button className="w-full" variant="default">
+                Ver Departamentos
+              </Button>
+              <Button className="w-full bg-transparent" variant="outline">
+                Crear Departamento
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-accent" />
+                Sistema
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button className="w-full" variant="default">
+                Monitoreo
+              </Button>
+              <Button className="w-full bg-transparent" variant="outline">
+                Configuración
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

@@ -24,11 +24,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmployeeService, type Employee, type CreateEmployeeData } from "@/lib/employees"
 import { CompanyService, type Department } from "@/lib/companies"
 import { Logger } from "@/lib/logger"
+import { useToast } from "@/hooks/use-toast"
 
 export default function EmployeesPage() {
   const { user, loading, isAuthenticated, logout } = useAuth()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { toast } = useToast()
   const [employees, setEmployees] = useState<Employee[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [loadingData, setLoadingData] = useState(true)
@@ -89,6 +91,11 @@ export default function EmployeesPage() {
   const handleCreateEmployee = async () => {
     if (!user?.companyId) {
       Logger.error("Cannot create employee: user has no companyId")
+      toast({
+        title: "Error",
+        description: "No se puede crear empleado: usuario sin companyId",
+        variant: "destructive",
+      })
       return
     }
 
@@ -99,6 +106,10 @@ export default function EmployeesPage() {
 
     try {
       await EmployeeService.createEmployee(newEmployee)
+      toast({
+        title: "Empleado creado",
+        description: "El empleado ha sido creado exitosamente",
+      })
       setShowCreateDialog(false)
       setNewEmployee({
         companyId: user.companyId,
@@ -111,6 +122,11 @@ export default function EmployeesPage() {
       loadEmployees()
     } catch (error) {
       Logger.error("Failed to create employee", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al crear empleado",
+        variant: "destructive",
+      })
     }
   }
 

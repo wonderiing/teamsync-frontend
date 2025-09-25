@@ -9,33 +9,155 @@ import { Badge } from "@/components/ui/badge"
 import { AttendanceService, type AttendanceRecord } from "@/lib/attendance"
 import { Clock, PlayCircle, PauseCircle, Calendar, MapPin, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { getCurrentDateString, formatDateToString, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth, formatTimeForDisplay } from "@/lib/date-utils"
+import { useAuth } from "@/hooks/use-auth"
 
 export function AttendanceTracker() {
+  const { user } = useAuth()
   const [currentRecord, setCurrentRecord] = useState<AttendanceRecord | null>(null)
   const [isCheckedIn, setIsCheckedIn] = useState(false)
   const [notes, setNotes] = useState("")
   const [loading, setLoading] = useState(false)
   const [todayHours, setTodayHours] = useState(0)
+  const [weeklyHours, setWeeklyHours] = useState(0)
+  const [monthlyHours, setMonthlyHours] = useState(0)
+  const [dailyAverage, setDailyAverage] = useState(0)
+  const [loadingStats, setLoadingStats] = useState(true)
+  const [loadingStatus, setLoadingStatus] = useState(true)
   const { toast } = useToast()
 
   useEffect(() => {
-    // Check if user is already checked in today
+    // Check if user is already checked in today and load stats
     checkTodayStatus()
+    loadAttendanceStats()
   }, [])
+
+  const getPersonalAttendances = async (startDate: string, endDate: string, page: number = 0, size: number = 10) => {
+    if (user?.role === "HR" || user?.role === "ADMIN") {
+      // Para usuarios HR/ADMIN, usar endpoint de empresa pero filtrar por su ID
+      console.log("HR/ADMIN user - using company endpoint as workaround")
+      const response = await AttendanceService.getCompanyAttendancesByRange(startDate, endDate, page, 100)
+      
+      // Filtrar solo las asistencias del usuario actual
+      if (user.employeeId) {
+        response.content = response.content.filter(record => record.employeeId === user.employeeId)
+      }
+      
+      return response
+    } else {
+      // Para empleados normales, usar endpoint personal
+      return await AttendanceService.getMyAttendancesByRange(startDate, endDate, page, size)
+    }
+  }
 
   const checkTodayStatus = async () => {
     try {
-      const today = new Date().toISOString().split("T")[0]
-      const response = await AttendanceService.getMyAttendancesByRange(today, today, 0, 1)
+      setLoadingStatus(true)
+      // Usar fecha local para evitar problemas de timezone
+      const today = getCurrentDateString()
+      
+      console.log('Checking attendance for date:', today)
+      console.log('Current time:', new Date().toString())
+      console.log('Current timezone offset:', new Date().getTimezoneOffset())
+      console.log('User role:', user?.role, 'Employee ID:', user?.employeeId)
+      
+      const response = await getPersonalAttendances(today, today, 0, 10)
 
       if (response.content.length > 0) {
-        const record = response.content[0]
-        setCurrentRecord(record)
-        setIsCheckedIn(!record.checkOutTime)
-        setTodayHours(record.totalHours || 0)
+        // Buscar el registro más reciente del día
+        const mostRecentRecord = response.content[0]
+        setCurrentRecord(mostRecentRecord)
+        setIsCheckedIn(!mostRecentRecord.checkOutTime)
+        
+        // Calcular horas trabajadas hoy usando nuestro cálculo
+        const todayHours = response.content.reduce((total, record) => {
+          const backendHours = record.totalHours || 0
+          const calculatedHours = record.checkOutTime 
+            ? calculateWorkHours(record.checkInTime, record.checkOutTime)
+            : 0
+          
+          // Usar nuestro cálculo si es diferente al del backend (puede ser más preciso)
+          return total + (calculatedHours > 0 ? calculatedHours : backendHours)
+        }, 0)
+        setTodayHours(todayHours)
+      } else {
+        // No hay registros para hoy, resetear estado
+        setCurrentRecord(null)
+        setIsCheckedIn(false)
+        setTodayHours(0)
       }
     } catch (error) {
       console.error("Error checking today status:", error)
+      // En caso de error, resetear estado
+      setCurrentRecord(null)
+      setIsCheckedIn(false)
+      setTodayHours(0)
+    } finally {
+      setLoadingStatus(false)
+    }
+  }
+
+  const loadAttendanceStats = async () => {
+    try {
+      setLoadingStats(true)
+      const today = new Date()
+      
+      // Calcular fechas usando las utilidades
+      const startOfWeek = getStartOfWeek(today)
+      const endOfWeek = getEndOfWeek(today)
+      const startOfMonth = getStartOfMonth(today)
+      const endOfMonth = getEndOfMonth(today)
+
+      // Cargar datos de la semana
+      const weekResponse = await getPersonalAttendances(
+        formatDateToString(startOfWeek),
+        formatDateToString(endOfWeek),
+        0,
+        100
+      )
+
+      // Cargar datos del mes
+      const monthResponse = await getPersonalAttendances(
+        formatDateToString(startOfMonth),
+        formatDateToString(endOfMonth),
+        0,
+        100
+      )
+
+      // Calcular horas semanales usando nuestro cálculo
+      const weekHours = weekResponse.content.reduce((total, record) => {
+        const backendHours = record.totalHours || 0
+        const calculatedHours = record.checkOutTime 
+          ? calculateWorkHours(record.checkInTime, record.checkOutTime)
+          : 0
+        
+        // Usar nuestro cálculo si es diferente al del backend (puede ser más preciso)
+        return total + (calculatedHours > 0 ? calculatedHours : backendHours)
+      }, 0)
+
+      // Calcular horas mensuales usando nuestro cálculo
+      const monthHours = monthResponse.content.reduce((total, record) => {
+        const backendHours = record.totalHours || 0
+        const calculatedHours = record.checkOutTime 
+          ? calculateWorkHours(record.checkInTime, record.checkOutTime)
+          : 0
+        
+        // Usar nuestro cálculo si es diferente al del backend (puede ser más preciso)
+        return total + (calculatedHours > 0 ? calculatedHours : backendHours)
+      }, 0)
+
+      // Calcular promedio diario (días trabajados en el mes)
+      const workingDays = monthResponse.content.length
+      const avgDaily = workingDays > 0 ? monthHours / workingDays : 0
+
+      setWeeklyHours(weekHours)
+      setMonthlyHours(monthHours)
+      setDailyAverage(avgDaily)
+
+    } catch (error) {
+      console.error("Error loading attendance stats:", error)
+    } finally {
+      setLoadingStats(false)
     }
   }
 
@@ -47,9 +169,13 @@ export function AttendanceTracker() {
       setIsCheckedIn(true)
       setNotes("")
 
+      // Recargar estado actual y estadísticas
+      checkTodayStatus()
+      loadAttendanceStats()
+
       toast({
         title: "Entrada registrada",
-        description: `Entrada registrada a las ${new Date(record.checkInTime).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`,
+        description: `Entrada registrada a las ${formatTime(record.checkInTime)}`,
       })
     } catch (error) {
       toast({
@@ -71,9 +197,13 @@ export function AttendanceTracker() {
       setTodayHours(record.totalHours || 0)
       setNotes("")
 
+      // Recargar estado actual y estadísticas
+      checkTodayStatus()
+      loadAttendanceStats()
+
       toast({
         title: "Salida registrada",
-        description: `Salida registrada a las ${new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`,
+        description: `Salida registrada a las ${formatTime(record.checkOutTime || "")}`,
       })
     } catch (error) {
       toast({
@@ -94,11 +224,39 @@ export function AttendanceTracker() {
     })
   }
 
-  const formatTime = (timeString: string) => {
-    return new Date(timeString).toLocaleTimeString("es-ES", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+  const formatTime = formatTimeForDisplay
+
+  const calculateWorkHours = (checkInTime: string, checkOutTime: string): number => {
+    try {
+      // Si no hay checkOutTime, no se pueden calcular horas
+      if (!checkOutTime) return 0
+
+      // Parsear las horas de entrada y salida
+      const [checkInHour, checkInMin] = checkInTime.split(':').map(Number)
+      const [checkOutHour, checkOutMin] = checkOutTime.split(':').map(Number)
+
+      let totalMinutes = 0
+
+      // Si la salida es al día siguiente (checkOutHour < checkInHour)
+      if (checkOutHour < checkInHour || (checkOutHour === checkInHour && checkOutMin < checkInMin)) {
+        // Calcular minutos hasta medianoche
+        const minutesToMidnight = (24 - checkInHour) * 60 - checkInMin
+        // Calcular minutos desde medianoche hasta la salida
+        const minutesFromMidnight = checkOutHour * 60 + checkOutMin
+        totalMinutes = minutesToMidnight + minutesFromMidnight
+      } else {
+        // Mismo día
+        const checkInMinutes = checkInHour * 60 + checkInMin
+        const checkOutMinutes = checkOutHour * 60 + checkOutMin
+        totalMinutes = checkOutMinutes - checkInMinutes
+      }
+
+      // Convertir a horas
+      return totalMinutes / 60
+    } catch (error) {
+      console.error("Error calculating work hours:", error)
+      return 0
+    }
   }
 
   return (
@@ -147,18 +305,52 @@ export function AttendanceTracker() {
             </div>
           </div>
 
-          {currentRecord && (
+          {loadingStatus ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              <span className="text-sm text-muted-foreground">Cargando estado actual...</span>
+            </div>
+          ) : currentRecord ? (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Entrada:</span>
                 <span className="font-medium">{formatTime(currentRecord.checkInTime)}</span>
               </div>
               {currentRecord.checkOutTime && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Salida:</span>
-                  <span className="font-medium">{formatTime(currentRecord.checkOutTime)}</span>
-                </div>
+                <>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Salida:</span>
+                    <span className="font-medium">{formatTime(currentRecord.checkOutTime)}</span>
+                  </div>
+                  {/* Mostrar si cruzó medianoche */}
+                  {(() => {
+                    const [checkInHour] = currentRecord.checkInTime.split(':').map(Number)
+                    const [checkOutHour] = currentRecord.checkOutTime.split(':').map(Number)
+                    const crossedMidnight = checkOutHour < checkInHour
+                    const calculatedHours = calculateWorkHours(currentRecord.checkInTime, currentRecord.checkOutTime)
+                    
+                    return (
+                      <div className="pt-2 border-t border-border/50">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Horas trabajadas:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{calculatedHours.toFixed(1)}h</span>
+                            {crossedMidnight && (
+                              <Badge variant="secondary" className="text-xs">
+                                +1 día
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </>
               )}
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <span className="text-sm text-muted-foreground">No hay registro de asistencia para hoy</span>
             </div>
           )}
         </CardContent>
@@ -244,7 +436,11 @@ export function AttendanceTracker() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Esta semana</p>
-                <p className="font-bold">32.5h</p>
+                {loadingStats ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <p className="font-bold">{weeklyHours.toFixed(1)}h</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -258,7 +454,11 @@ export function AttendanceTracker() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Promedio diario</p>
-                <p className="font-bold">8.1h</p>
+                {loadingStats ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <p className="font-bold">{dailyAverage.toFixed(1)}h</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -272,7 +472,11 @@ export function AttendanceTracker() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Este mes</p>
-                <p className="font-bold">142h</p>
+                {loadingStats ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <p className="font-bold">{monthlyHours.toFixed(1)}h</p>
+                )}
               </div>
             </div>
           </CardContent>
