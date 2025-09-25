@@ -1,6 +1,6 @@
-# 🚀 Worky App - Sistema de Gestión de Recursos Humanos
+# 🚀 TeamSync Frontend - Proyecto Final IDS
 
-Un sistema completo de gestión de recursos humanos construido con **Next.js 14**, **TypeScript**, **Tailwind CSS** y **shadcn/ui**.
+Sistema completo de gestión de recursos humanos construido con **Next.js 14**, **TypeScript**, **Tailwind CSS** y **shadcn/ui**.
 
 ## 📋 Características Principales
 
@@ -177,32 +177,4 @@ npm run lint         # Ejecutar ESLint
 npm run type-check   # Verificar tipos TypeScript
 ```
 
-## 👥 Roles y Permisos
 
-### **ADMIN**
-- ✅ Acceso completo al sistema
-- ✅ Gestión de empresas y departamentos
-- ✅ Ver todas las estadísticas
-- ✅ CRUD completo en todos los módulos
-
-### **HR (Recursos Humanos)**
-- ✅ Gestión de empleados de su empresa
-- ✅ Aprobación de solicitudes
-- ✅ Ver asistencias de la empresa
-- ✅ Gestión de capacitaciones
-- ✅ Ver departamentos (solo lectura)
-
-### **EMPLOYEE (Empleado)**
-- ✅ Check-in/Check-out de asistencias
-- ✅ Ver sus propias asistencias
-- ✅ Crear solicitudes
-- ✅ Ver sus solicitudes
-- ✅ Acceder a capacitaciones
-
-## 👨‍💻 Desarrollador
-
-**Carlos Rodríguez** - Desarrollador Full Stack
-
----
-
-**Desarrollado con ❤️ para la gestión eficiente de recursos humanos**
