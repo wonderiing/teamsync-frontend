@@ -1,3 +1,5 @@
+import { Logger } from "./logger"
+
 export interface User {
   id: number
   username: string
@@ -105,6 +107,13 @@ export class AuthService {
         position: data.position
       }
       
+      Logger.info("User logged in with email", { 
+        userId: user.id, 
+        username: user.username, 
+        companyId: user.companyId,
+        role: user.role 
+      })
+      
       return {
         token: data.token,
         user: user
@@ -140,6 +149,13 @@ export class AuthService {
         fullName: data.fullName || data.username,
         position: data.position
       }
+      
+      Logger.info("User logged in with username", { 
+        userId: user.id, 
+        username: user.username, 
+        companyId: user.companyId,
+        role: user.role 
+      })
       
       return {
         token: data.token,
@@ -183,6 +199,13 @@ export class AuthService {
         position: data.position
       }
       
+      Logger.info("User validated from token", { 
+        userId: user.id, 
+        username: user.username, 
+        companyId: user.companyId,
+        role: user.role 
+      })
+      
       return user
     } catch {
       this.removeToken()
@@ -213,7 +236,6 @@ export class AuthService {
     username: string,
     email: string,
     password: string,
-    companyId: number,
   ): Promise<LoginResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register/hr`, {
@@ -221,10 +243,27 @@ export class AuthService {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, email, password, companyId }),
+        body: JSON.stringify({ username, email, password }),
       })
 
-      return await this.handleAuthResponse(response)
+      const data = await this.handleAuthResponse(response)
+      this.setToken(data.token)
+      
+      // Transformar la respuesta del backend al formato esperado
+      const user: User = {
+        id: data.employeeId || data.id || 0,
+        username: data.username,
+        email: data.email || email,
+        role: data.role || "HR",
+        companyId: data.companyId,
+        fullName: data.fullName || data.username,
+        position: data.position
+      }
+      
+      return {
+        token: data.token,
+        user: user
+      }
     } catch (error) {
       if (error instanceof TypeError && error.message.includes("fetch")) {
         throw new Error("No se puede conectar al servidor. Verifica que el backend esté ejecutándose en localhost:8090")

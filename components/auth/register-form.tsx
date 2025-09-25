@@ -38,7 +38,6 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
     email: "",
     password: "",
     confirmPassword: "",
-    companyId: "",
   })
 
   const handleEmployeeRegister = async (e: React.FormEvent) => {
@@ -84,15 +83,11 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
       return
     }
 
-    if (!hrForm.companyId) {
-      setError("Debe seleccionar una empresa")
-      return
-    }
 
     setLoading(true)
 
     try {
-      await AuthService.registerHR(hrForm.username, hrForm.email, hrForm.password, Number.parseInt(hrForm.companyId))
+      await AuthService.registerHR(hrForm.username, hrForm.email, hrForm.password)
       Logger.info("HR registration completed successfully")
       onSuccess?.()
     } catch (err) {
@@ -112,7 +107,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
             <Building2 className="w-6 h-6 text-primary-foreground" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold">Registro en Worky</CardTitle>
+        <CardTitle className="text-2xl font-bold">Registro en TeamSync</CardTitle>
         <CardDescription>Crea tu cuenta para comenzar a usar la plataforma</CardDescription>
       </CardHeader>
       <CardContent>
@@ -241,22 +236,6 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="hr-company">Empresa</Label>
-                <Select
-                  value={hrForm.companyId}
-                  onValueChange={(value) => setHrForm((prev) => ({ ...prev, companyId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona tu empresa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Empresa Demo 1</SelectItem>
-                    <SelectItem value="2">Empresa Demo 2</SelectItem>
-                    <SelectItem value="3">Empresa Demo 3</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="hr-password">Contraseña</Label>

@@ -36,7 +36,7 @@ export default function EmployeesPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   const [newEmployee, setNewEmployee] = useState<CreateEmployeeData>({
-    companyId: user?.companyId || 1,
+    companyId: user?.companyId || 0,
     departmentId: 1,
     fullName: "",
     email: "",
@@ -52,6 +52,11 @@ export default function EmployeesPage() {
 
   useEffect(() => {
     if (user) {
+      // Actualizar el companyId del nuevo empleado cuando el usuario esté disponible
+      setNewEmployee(prev => ({
+        ...prev,
+        companyId: user.companyId || 0
+      }))
       loadEmployees()
       loadDepartments()
     }
@@ -82,11 +87,21 @@ export default function EmployeesPage() {
   }
 
   const handleCreateEmployee = async () => {
+    if (!user?.companyId) {
+      Logger.error("Cannot create employee: user has no companyId")
+      return
+    }
+
+    Logger.info("Creating employee with companyId", { 
+      companyId: user.companyId, 
+      employeeData: newEmployee 
+    })
+
     try {
       await EmployeeService.createEmployee(newEmployee)
       setShowCreateDialog(false)
       setNewEmployee({
-        companyId: user?.companyId || 1,
+        companyId: user.companyId,
         departmentId: 1,
         fullName: "",
         email: "",

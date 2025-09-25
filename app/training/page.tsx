@@ -35,7 +35,7 @@ export default function TrainingPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   const [newTutorial, setNewTutorial] = useState<CreateTutorialData>({
-    idCompany: user?.companyId || 1,
+    idCompany: user?.companyId || 0,
     title: "",
     description: "",
     durationMinutes: 0,
@@ -62,6 +62,11 @@ export default function TrainingPage() {
 
   useEffect(() => {
     if (user) {
+      // Actualizar el companyId del nuevo tutorial cuando el usuario esté disponible
+      setNewTutorial(prev => ({
+        ...prev,
+        idCompany: user.companyId || 0
+      }))
       loadTutorials()
     }
   }, [user])
@@ -80,11 +85,21 @@ export default function TrainingPage() {
   }
 
   const handleCreateTutorial = async () => {
+    if (!user?.companyId) {
+      Logger.error("Cannot create tutorial: user has no companyId")
+      return
+    }
+
+    Logger.info("Creating tutorial with companyId", { 
+      companyId: user.companyId, 
+      tutorialData: newTutorial 
+    })
+
     try {
       await TrainingService.createTutorial(newTutorial)
       setShowCreateDialog(false)
       setNewTutorial({
-        idCompany: user?.companyId || 1,
+        idCompany: user.companyId,
         title: "",
         description: "",
         durationMinutes: 0,

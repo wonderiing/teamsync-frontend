@@ -85,7 +85,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
             <Building2 className="w-6 h-6 text-primary-foreground" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold">Bienvenido a Worky</CardTitle>
+        <CardTitle className="text-2xl font-bold">Bienvenido a TeamSync</CardTitle>
         <CardDescription>Inicia sesión para acceder a tu plataforma de gestión empresarial</CardDescription>
       </CardHeader>
       <CardContent>

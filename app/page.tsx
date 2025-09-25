@@ -1,15 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { useAuth } from "@/hooks/use-auth"
-import { LoginForm } from "@/components/auth/login-form"
-import { RegisterForm } from "@/components/auth/register-form"
+import { LandingPage } from "@/components/landing/landing-page"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function HomePage() {
   const { user, loading, isAuthenticated } = useAuth()
-  const [showRegister, setShowRegister] = useState(false)
   const router = useRouter()
 
   // Redirigir al dashboard si está autenticado
@@ -21,10 +19,10 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Cargando...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <p className="text-gray-300">Cargando...</p>
         </div>
       </div>
     )
@@ -32,24 +30,14 @@ export default function HomePage() {
 
   if (isAuthenticated && user) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Redirigiendo...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <p className="text-gray-300">Redirigiendo...</p>
         </div>
       </div>
     )
   }
 
-  return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {showRegister ? (
-          <RegisterForm onSuccess={() => setShowRegister(false)} onSwitchToLogin={() => setShowRegister(false)} />
-        ) : (
-          <LoginForm onSwitchToRegister={() => setShowRegister(true)} />
-        )}
-      </div>
-    </div>
-  )
+  return <LandingPage />
 }
