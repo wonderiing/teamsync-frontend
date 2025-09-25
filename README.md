@@ -2,59 +2,6 @@
 
 Sistema completo de gestión de recursos humanos construido con **Next.js 14**, **TypeScript**, **Tailwind CSS** y **shadcn/ui**.
 
-## 📋 Características Principales
-
-### 🔐 **Autenticación y Autorización**
-- ✅ Login con email/username y contraseña
-- ✅ Registro de empleados y personal de RRHH
-- ✅ Sistema de roles: `ADMIN`, `HR`, `EMPLOYEE`
-- ✅ Tokens JWT con validación automática
-- ✅ Protección de rutas por rol
-
-### 📊 **Dashboard Inteligente**
-- ✅ Dashboard personalizado por rol
-- ✅ Estadísticas en tiempo real
-- ✅ Accesos rápidos a funciones principales
-- ✅ Información contextual según permisos
-
-### ⏰ **Gestión de Asistencias**
-- ✅ Check-in/Check-out con notas
-- ✅ Cálculo automático de horas trabajadas
-- ✅ Soporte para turnos que cruzan medianoche
-- ✅ Historial personal y de empresa
-- ✅ Estadísticas semanales y mensuales
-
-### 📝 **Sistema de Solicitudes**
-- ✅ Creación de solicitudes por empleados
-- ✅ Gestión y aprobación por RRHH
-- ✅ Tipos: Vacaciones, Reembolsos, Certificados, etc.
-- ✅ Estados: Recibido, En Revisión, Aprobado, Rechazado
-- ✅ Seguimiento en tiempo real
-
-### 👥 **Gestión de Empleados**
-- ✅ CRUD completo de empleados
-- ✅ Información detallada: contacto, departamento, posición
-- ✅ Búsqueda y filtrado avanzado
-- ✅ Gestión de estados activo/inactivo
-
-### 🎓 **Capacitación**
-- ✅ Creación y gestión de tutoriales
-- ✅ Categorización por temas
-- ✅ URLs de videos y duración
-- ✅ Acceso según rol de usuario
-
-### 🏢 **Gestión de Departamentos**
-- ✅ Creación y administración de departamentos
-- ✅ Asignación automática por empresa
-- ✅ Solo para usuarios ADMIN
-
-### 🎨 **UI/UX Moderna**
-- ✅ Diseño dark theme elegante
-- ✅ Animaciones de éxito para todas las operaciones
-- ✅ Componentes reutilizables con shadcn/ui
-- ✅ Responsive design para todos los dispositivos
-- ✅ Toast notifications informativas
-
 ## 🛠️ Tecnologías Utilizadas
 
 ### **Frontend**
