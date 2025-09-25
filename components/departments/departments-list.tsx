@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { Building2, Trash2, Loader2, Users } from "lucide-react"
 import { formatDateForDisplay } from "@/lib/date-utils"
 import { Pagination } from "@/components/ui/pagination"
+import { SuccessAnimation } from "@/components/ui/success-animation"
 
 export function DepartmentsList() {
   const { user } = useAuth()
@@ -19,6 +20,8 @@ export function DepartmentsList() {
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   const { toast } = useToast()
 
   const loadDepartments = async () => {
@@ -66,10 +69,17 @@ export function DepartmentsList() {
     setDeletingId(id)
     try {
       await DepartmentService.deleteDepartment(id)
+      
+      // Mostrar animación de éxito
+      setSuccessMessage(`Departamento "${name}" eliminado exitosamente`)
+      setShowSuccessAnimation(true)
+      
+      // También mostrar toast para feedback inmediato
       toast({
         title: "✅ Departamento eliminado exitosamente",
         description: `El departamento "${name}" ha sido eliminado correctamente`,
       })
+      
       loadDepartments() // Recargar la lista
     } catch (error) {
       toast({
@@ -108,19 +118,21 @@ export function DepartmentsList() {
             size="sm"
             onClick={async () => {
               try {
-                console.log('Creating test department...')
                 const testDept = await DepartmentService.createDepartment(
                   `Departamento Test ${new Date().toLocaleTimeString()}`, 
                   user?.companyId || 1
                 )
-                console.log('Test department created:', testDept)
+                
+                // Mostrar animación de éxito
+                setSuccessMessage(`Departamento "${testDept.fullName}" creado exitosamente`)
+                setShowSuccessAnimation(true)
+                
                 toast({
                   title: "✅ Departamento creado exitosamente",
                   description: `Se creó: ${testDept.fullName}`,
                 })
                 loadDepartments() // Recargar la lista
               } catch (error) {
-                console.error('Error creating test department:', error)
                 toast({
                   title: "❌ Error al crear departamento",
                   description: error instanceof Error ? error.message : "Error al crear departamento de prueba",
@@ -211,6 +223,12 @@ export function DepartmentsList() {
         />
       </CardContent>
 
+      {/* Success Animation */}
+      <SuccessAnimation
+        show={showSuccessAnimation}
+        message={successMessage}
+        onComplete={() => setShowSuccessAnimation(false)}
+      />
     </Card>
   )
 }

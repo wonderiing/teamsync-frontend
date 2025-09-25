@@ -189,6 +189,20 @@ export class DepartmentService {
       throw new Error("Error al eliminar departamento")
     }
 
-    Logger.info("Department deleted successfully", { id })
+    // Para DELETE, el backend puede devolver 204 (No Content) sin body
+    // Solo intentamos parsear JSON si hay contenido
+    if (response.status === 204) {
+      Logger.info("Department deleted successfully (204 No Content)", { id })
+      return
+    }
+
+    // Si no es 204, intentamos parsear la respuesta
+    try {
+      const data = await response.json()
+      Logger.info("Department deleted successfully", { id, data })
+    } catch (error) {
+      // Si no se puede parsear JSON, asumimos que fue exitoso si el status es OK
+      Logger.info("Department deleted successfully (no JSON response)", { id })
+    }
   }
 }

@@ -10,6 +10,7 @@ import { DepartmentService } from "@/lib/departments"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 import { Building2, Plus, Loader2 } from "lucide-react"
+import { SuccessAnimation } from "@/components/ui/success-animation"
 
 interface AddDepartmentFormProps {
   onSuccess?: () => void
@@ -22,6 +23,8 @@ export function AddDepartmentForm({ onSuccess }: AddDepartmentFormProps) {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,10 +45,14 @@ export function AddDepartmentForm({ onSuccess }: AddDepartmentFormProps) {
     }
 
     try {
-      await DepartmentService.createDepartment(
+      const newDepartment = await DepartmentService.createDepartment(
         form.fullName.trim(),
         user.companyId
       )
+
+      // Mostrar animación de éxito
+      setSuccessMessage(`Departamento "${form.fullName}" creado exitosamente`)
+      setShowSuccessAnimation(true)
 
       toast({
         title: "✅ Departamento creado exitosamente",
@@ -119,6 +126,13 @@ export function AddDepartmentForm({ onSuccess }: AddDepartmentFormProps) {
           </Button>
         </form>
       </CardContent>
+
+      {/* Success Animation */}
+      <SuccessAnimation
+        show={showSuccessAnimation}
+        message={successMessage}
+        onComplete={() => setShowSuccessAnimation(false)}
+      />
     </Card>
   )
 }

@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RequestService, type RequestType, REQUEST_TYPE_LABELS } from "@/lib/requests"
 import { FileText, Loader2, Send } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { SuccessAnimation } from "@/components/ui/success-animation"
 
 interface CreateRequestFormProps {
   onSuccess?: () => void
@@ -24,6 +25,8 @@ export function CreateRequestForm({ onSuccess }: CreateRequestFormProps) {
     description: "",
   })
   const [loading, setLoading] = useState(false)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,9 +42,14 @@ export function CreateRequestForm({ onSuccess }: CreateRequestFormProps) {
 
     setLoading(true)
     try {
-      await RequestService.createRequest(formData)
+      const newRequest = await RequestService.createRequest(formData)
+      
+      // Mostrar animación de éxito
+      setSuccessMessage(`Solicitud "${formData.title}" creada exitosamente`)
+      setShowSuccessAnimation(true)
+      
       toast({
-        title: "Solicitud creada",
+        title: "✅ Solicitud creada exitosamente",
         description: "Tu solicitud ha sido enviada y está siendo procesada",
       })
       setFormData({ requestType: "" as RequestType, title: "", description: "" })
@@ -151,6 +159,13 @@ export function CreateRequestForm({ onSuccess }: CreateRequestFormProps) {
           </Button>
         </form>
       </CardContent>
+
+      {/* Success Animation */}
+      <SuccessAnimation
+        show={showSuccessAnimation}
+        message={successMessage}
+        onComplete={() => setShowSuccessAnimation(false)}
+      />
     </Card>
   )
 }

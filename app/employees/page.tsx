@@ -25,6 +25,7 @@ import { EmployeeService, type Employee, type CreateEmployeeData } from "@/lib/e
 import { CompanyService, type Department } from "@/lib/companies"
 import { Logger } from "@/lib/logger"
 import { useToast } from "@/hooks/use-toast"
+import { SuccessAnimation } from "@/components/ui/success-animation"
 
 export default function EmployeesPage() {
   const { user, loading, isAuthenticated, logout } = useAuth()
@@ -36,6 +37,8 @@ export default function EmployeesPage() {
   const [loadingData, setLoadingData] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
 
   const [newEmployee, setNewEmployee] = useState<CreateEmployeeData>({
     companyId: user?.companyId || 0,
@@ -105,9 +108,14 @@ export default function EmployeesPage() {
     })
 
     try {
-      await EmployeeService.createEmployee(newEmployee)
+      const createdEmployee = await EmployeeService.createEmployee(newEmployee)
+      
+      // Mostrar animación de éxito
+      setSuccessMessage(`Empleado "${newEmployee.fullName}" creado exitosamente`)
+      setShowSuccessAnimation(true)
+      
       toast({
-        title: "Empleado creado",
+        title: "✅ Empleado creado exitosamente",
         description: "El empleado ha sido creado exitosamente",
       })
       setShowCreateDialog(false)
@@ -131,11 +139,33 @@ export default function EmployeesPage() {
   }
 
   const handleDeleteEmployee = async (id: number) => {
+    const employee = employees.find(emp => emp.id === id)
+    const employeeName = employee?.fullName || "empleado"
+    
+    if (!confirm(`¿Estás seguro de que quieres eliminar al empleado "${employeeName}"?`)) {
+      return
+    }
+
     try {
       await EmployeeService.deleteEmployee(id)
+      
+      // Mostrar animación de éxito
+      setSuccessMessage(`Empleado "${employeeName}" eliminado exitosamente`)
+      setShowSuccessAnimation(true)
+      
+      toast({
+        title: "✅ Empleado eliminado exitosamente",
+        description: `El empleado "${employeeName}" ha sido eliminado correctamente`,
+      })
+      
       loadEmployees()
     } catch (error) {
       Logger.error("Failed to delete employee", error)
+      toast({
+        title: "❌ Error al eliminar empleado",
+        description: error instanceof Error ? error.message : "Error al eliminar empleado",
+        variant: "destructive",
+      })
     }
   }
 
@@ -470,6 +500,13 @@ export default function EmployeesPage() {
           </div>
         </main>
       </div>
+
+      {/* Success Animation */}
+      <SuccessAnimation
+        show={showSuccessAnimation}
+        message={successMessage}
+        onComplete={() => setShowSuccessAnimation(false)}
+      />
     </div>
   )
 }

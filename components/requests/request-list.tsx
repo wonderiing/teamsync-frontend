@@ -16,6 +16,7 @@ import {
 import { FileText, Filter, Eye, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Pagination } from "@/components/ui/pagination"
+import { SuccessAnimation } from "@/components/ui/success-animation"
 
 interface RequestListProps {
   isHR?: boolean
@@ -29,6 +30,8 @@ export function RequestList({ isHR = false, onRequestSelect }: RequestListProps)
   const [totalPages, setTotalPages] = useState(0)
   const [typeFilter, setTypeFilter] = useState<RequestType | "all">("all")
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">("all")
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   const { toast } = useToast()
 
   useEffect(() => {

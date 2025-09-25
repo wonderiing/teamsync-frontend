@@ -24,6 +24,7 @@ import {
 import { TrainingService, type Tutorial, type CreateTutorialData } from "@/lib/training"
 import { Logger } from "@/lib/logger"
 import { useToast } from "@/hooks/use-toast"
+import { SuccessAnimation } from "@/components/ui/success-animation"
 
 export default function TrainingPage() {
   const { user, loading, isAuthenticated, logout } = useAuth()
@@ -35,6 +36,8 @@ export default function TrainingPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL")
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
 
   const [newTutorial, setNewTutorial] = useState<CreateTutorialData>({
     idCompany: user?.companyId || 0,
@@ -103,9 +106,14 @@ export default function TrainingPage() {
     })
 
     try {
-      await TrainingService.createTutorial(newTutorial)
+      const createdTutorial = await TrainingService.createTutorial(newTutorial)
+      
+      // Mostrar animación de éxito
+      setSuccessMessage(`Tutorial "${newTutorial.title}" creado exitosamente`)
+      setShowSuccessAnimation(true)
+      
       toast({
-        title: "Tutorial creado",
+        title: "✅ Tutorial creado exitosamente",
         description: "El tutorial ha sido creado exitosamente",
       })
       setShowCreateDialog(false)
@@ -129,11 +137,33 @@ export default function TrainingPage() {
   }
 
   const handleDeleteTutorial = async (id: number) => {
+    const tutorial = tutorials.find(tut => tut.id === id)
+    const tutorialName = tutorial?.title || "tutorial"
+    
+    if (!confirm(`¿Estás seguro de que quieres eliminar el tutorial "${tutorialName}"?`)) {
+      return
+    }
+
     try {
       await TrainingService.deleteTutorial(id)
+      
+      // Mostrar animación de éxito
+      setSuccessMessage(`Tutorial "${tutorialName}" eliminado exitosamente`)
+      setShowSuccessAnimation(true)
+      
+      toast({
+        title: "✅ Tutorial eliminado exitosamente",
+        description: `El tutorial "${tutorialName}" ha sido eliminado correctamente`,
+      })
+      
       loadTutorials()
     } catch (error) {
       Logger.error("Failed to delete tutorial", error)
+      toast({
+        title: "❌ Error al eliminar tutorial",
+        description: error instanceof Error ? error.message : "Error al eliminar tutorial",
+        variant: "destructive",
+      })
     }
   }
 
@@ -388,6 +418,13 @@ export default function TrainingPage() {
           </div>
         </main>
       </div>
+
+      {/* Success Animation */}
+      <SuccessAnimation
+        show={showSuccessAnimation}
+        message={successMessage}
+        onComplete={() => setShowSuccessAnimation(false)}
+      />
     </div>
   )
 }

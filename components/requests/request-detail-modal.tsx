@@ -23,6 +23,7 @@ import {
 } from "@/lib/requests"
 import { FileText, Clock, User, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { SuccessAnimation } from "@/components/ui/success-animation"
 
 interface RequestDetailModalProps {
   request: Request | null
@@ -36,6 +37,8 @@ export function RequestDetailModal({ request, isOpen, onClose, onUpdate, canMana
   const [newStatus, setNewStatus] = useState<RequestStatus>("")
   const [reason, setReason] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   const { toast } = useToast()
 
   if (!request) return null
@@ -57,8 +60,12 @@ export function RequestDetailModal({ request, isOpen, onClose, onUpdate, canMana
         reason: reason || undefined,
       })
 
+      // Mostrar animación de éxito
+      setSuccessMessage(`Solicitud ${REQUEST_STATUS_LABELS[newStatus].toLowerCase()} exitosamente`)
+      setShowSuccessAnimation(true)
+
       toast({
-        title: "Estado actualizado",
+        title: "✅ Estado actualizado exitosamente",
         description: `La solicitud ha sido ${REQUEST_STATUS_LABELS[newStatus].toLowerCase()}`,
       })
 
@@ -248,6 +255,13 @@ export function RequestDetailModal({ request, isOpen, onClose, onUpdate, canMana
           )}
         </DialogFooter>
       </DialogContent>
+
+      {/* Success Animation */}
+      <SuccessAnimation
+        show={showSuccessAnimation}
+        message={successMessage}
+        onComplete={() => setShowSuccessAnimation(false)}
+      />
     </Dialog>
   )
 }
